@@ -49,7 +49,7 @@ const empty = { vehicle_number: "", violation_type: TYPES[0], location: "", viol
 
 function Dashboard() {
   const uid = "public";
-  const isAdmin = true;
+  const isAdmin = false;
   const [rows, setRows] = useState<Violation[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [form, setForm] = useState(empty);
@@ -85,7 +85,7 @@ function Dashboard() {
       const { error } = await supabase.storage.from("violation-images").upload(path, file);
       if (!error) image_path = path;
     }
-    const payload = { ...form, vehicle_number: form.vehicle_number.toUpperCase(), ...(image_path ? { image_path } : {}) };
+    const payload = { ...form, vehicle_number: form.vehicle_number.toUpperCase().slice(0, 20), location: form.location.slice(0, 200), description: form.description.slice(0, 1000), ...(image_path ? { image_path } : {}) };
     if (editing) await supabase.from("violations").update(payload).eq("id", editing);
     else await supabase.from("violations").insert(payload);
     setForm(empty); setFile(null); setEditing(null); setBusy(false);
@@ -153,7 +153,7 @@ function Dashboard() {
         {shown.length === 0 && <p className="text-muted-foreground">No reports yet.</p>}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {shown.map((v) => {
-            const mine = true;
+            const mine = false;
             return (
               <article key={v.id} className="overflow-hidden rounded-sm border border-border bg-card">
                 {v.image_path && urls[v.image_path]
