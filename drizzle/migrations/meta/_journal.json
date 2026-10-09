@@ -29,6 +29,13 @@
       "when": 1791546372034,
       "tag": "0003_lock_storage",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791546775735,
+      "tag": "0004_restrict_public_reads",
+      "breakpoints": true
     }
   ]
 }
