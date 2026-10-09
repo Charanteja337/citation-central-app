@@ -63,7 +63,7 @@ function Dashboard() {
     const { data } = await supabase.from("violations").select("*").order("created_at", { ascending: false });
     const list = (data ?? []) as Violation[];
     setRows(list);
-    const paths = list.map((r) => r.image_path).filter(Boolean) as string[];
+    const paths: string[] = [];
     if (paths.length) {
       const { data: signed } = await supabase.storage.from("violation-images").createSignedUrls(paths, 3600);
       const map: Record<string, string> = {};
@@ -89,8 +89,7 @@ function Dashboard() {
     if (editing) await supabase.from("violations").update(payload).eq("id", editing);
     else await supabase.from("violations").insert(payload);
     setForm(empty); setFile(null); setEditing(null); setBusy(false);
-    (document.getElementById("file") as HTMLInputElement).value = "";
-    load();
+        load();
   }
 
   function edit(v: Violation) {
@@ -134,7 +133,7 @@ function Dashboard() {
         <input className={input} required placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
         <input className={input} type="date" required value={form.violation_date} onChange={(e) => setForm({ ...form, violation_date: e.target.value })} />
         <textarea className={`${input} md:col-span-2`} rows={2} placeholder="Description (optional)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-        <input id="file" type="file" accept="image/*" className="text-sm text-muted-foreground" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        <div />
         <div className="flex justify-end gap-2">
           {editing && <button type="button" className="px-4 py-2 text-muted-foreground" onClick={() => { setEditing(null); setForm(empty); }}>Cancel</button>}
           <button className={btn} disabled={busy}>{busy ? "Saving…" : editing ? "Update" : "Submit report"}</button>

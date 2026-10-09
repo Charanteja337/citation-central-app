@@ -22,6 +22,13 @@
       "when": 1791546266298,
       "tag": "0002_restrict_public_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791546372034,
+      "tag": "0003_lock_storage",
+      "breakpoints": true
     }
   ]
 }
