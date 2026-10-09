@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -34,83 +33,23 @@ const input = "w-full rounded-sm border border-input bg-background px-3 py-2 tex
 const btn = "rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50";
 
 function Index() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    supabase.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true); });
-    return () => data.subscription.unsubscribe();
-  }, []);
-
   return (
     <div className="min-h-screen font-sans">
       <div className="hazard-stripe h-2" />
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+      <header className="mx-auto max-w-6xl px-6 py-5">
         <h1 className="font-display text-2xl tracking-tight">ROAD<span className="text-primary">WATCH</span></h1>
-        {session && (
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>{session.user.email}</span>
-            <button className="underline hover:text-foreground" onClick={() => supabase.auth.signOut()}>Sign out</button>
-          </div>
-        )}
+        <p className="mt-2 text-muted-foreground">Saw a violation? Log the vehicle, location, date and a photo.</p>
       </header>
-      {!ready ? null : session ? <Dashboard session={session} /> : <Auth />}
+      <Dashboard />
     </div>
-  );
-}
-
-function Auth() {
-  const [mode, setMode] = useState<"in" | "up">("in");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [msg, setMsg] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    setBusy(true); setMsg("");
-    const res = mode === "in"
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
-    setBusy(false);
-    if (res.error) setMsg(res.error.message);
-    else if (mode === "up" && !res.data.session) setMsg("Check your email to confirm your account.");
-  }
-
-  return (
-    <main className="mx-auto grid max-w-6xl gap-12 px-6 py-16 md:grid-cols-2">
-      <section>
-        <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary">Citizen reporting</p>
-        <h2 className="font-display text-5xl leading-tight">Saw a violation?<br />Report it.</h2>
-        <p className="mt-6 max-w-md text-lg text-muted-foreground">
-          Log the vehicle, location, date and a photo. Officers review every report and update its status.
-        </p>
-        <ul className="mt-8 space-y-2 text-muted-foreground">
-          <li>▸ Add, view, edit and delete your reports</li>
-          <li>▸ Admins verify or reject submissions</li>
-          <li>▸ Photo evidence stored securely</li>
-        </ul>
-      </section>
-      <form onSubmit={submit} className="space-y-4 rounded-sm border border-border bg-card p-8">
-        <h3 className="font-display text-xl">{mode === "in" ? "Sign in" : "Create account"}</h3>
-        <input className={input} type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input className={input} type="password" required minLength={6} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button className={`${btn} w-full`} disabled={busy}>{mode === "in" ? "Sign in" : "Sign up"}</button>
-        {msg && <p className="text-sm text-primary">{msg}</p>}
-        <button type="button" className="text-sm text-muted-foreground underline" onClick={() => setMode(mode === "in" ? "up" : "in")}>
-          {mode === "in" ? "No account? Sign up" : "Have an account? Sign in"}
-        </button>
-      </form>
-    </main>
   );
 }
 
 const empty = { vehicle_number: "", violation_type: TYPES[0], location: "", violation_date: new Date().toISOString().slice(0, 10), description: "" };
 
-function Dashboard({ session }: { session: Session }) {
-  const uid = session.user.id;
-  const [isAdmin, setIsAdmin] = useState(false);
+function Dashboard() {
+  const uid = "public";
+  const isAdmin = true;
   const [rows, setRows] = useState<Violation[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [form, setForm] = useState(empty);
@@ -135,8 +74,7 @@ function Dashboard({ session }: { session: Session }) {
 
   useEffect(() => {
     load();
-    supabase.from("user_roles").select("role").eq("user_id", uid).then(({ data }) => setIsAdmin(!!data?.some((r) => r.role === "admin")));
-  }, [uid]);
+  }, []);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -186,7 +124,6 @@ function Dashboard({ session }: { session: Session }) {
           </div>
         ))}
       </section>
-      {isAdmin && <p className="text-sm text-primary">You are signed in as admin — you can verify, reject, edit or delete any report.</p>}
 
       <form onSubmit={submit} className="grid gap-4 rounded-sm border border-border bg-card p-6 md:grid-cols-2">
         <h2 className="font-display text-xl md:col-span-2">{editing ? "Edit report" : "New report"}</h2>
@@ -216,7 +153,7 @@ function Dashboard({ session }: { session: Session }) {
         {shown.length === 0 && <p className="text-muted-foreground">No reports yet.</p>}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {shown.map((v) => {
-            const mine = v.reporter_id === uid;
+            const mine = true;
             return (
               <article key={v.id} className="overflow-hidden rounded-sm border border-border bg-card">
                 {v.image_path && urls[v.image_path]
