@@ -27,7 +27,7 @@ type Violation = {
   status: string;
 };
 
-const TYPES = ["Signal jumping", "Over-speeding", "No helmet", "No seatbelt", "Wrong-side driving", "Illegal parking", "Phone while driving", "Other"];
+const TYPES: [string, ...string[]] = ["Signal jumping", "Over-speeding", "No helmet", "No seatbelt", "Wrong-side driving", "Illegal parking", "Phone while driving", "Other"];
 const STATUSES = ["pending", "verified", "rejected"];
 
 const input = "w-full rounded-sm border border-input bg-background px-3 py-2 text-foreground outline-none focus:border-ring";
