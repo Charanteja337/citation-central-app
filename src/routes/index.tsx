@@ -64,7 +64,6 @@ function Dashboard() {
     const list = (data ?? []) as Violation[];
     setRows(list);
     const paths: string[] = [];
-    void list.map((r) => r.image_path).filter(Boolean) as string[];
     if (paths.length) {
       const { data: signed } = await supabase.storage.from("violation-images").createSignedUrls(paths, 3600);
       const map: Record<string, string> = {};
